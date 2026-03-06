@@ -2,9 +2,9 @@
 
 ## Current State
 
-**Project Status**: ✅ Supabase Integration Complete
+**Project Status**: ✅ Authentication System Complete
 
-Proyek "Katalog Digital QR UMKM" dengan Next.js 16 dan Supabase SSR telah dikonfigurasi. Siap untuk pengembangan fitur katalog digital dan QR code.
+Proyek "Katalog Digital QR UMKM" dengan Next.js 16 dan Supabase SSR telah dikonfigurasi dengan sistem otentikasi lengkap.
 
 ## Recently Completed
 
@@ -19,6 +19,10 @@ Proyek "Katalog Digital QR UMKM" dengan Next.js 16 dan Supabase SSR telah dikonf
 - [x] lib/supabase/client.ts - Browser client (createBrowserClient)
 - [x] lib/supabase/server.ts - Server client (createServerClient)
 - [x] middleware.ts - Auth token refresh with getClaims() validation
+- [x] **Authentication UI & Logic**:
+  - [x] src/app/(auth)/login/page.tsx - Login page with Google OAuth + Email/Password
+  - [x] src/app/(auth)/actions.ts - Server Actions (signInWithEmail, signUpWithEmail, signOut)
+  - [x] src/app/auth/callback/route.ts - OAuth callback handler, redirects to /dashboard
 
 ## Current Structure
 
@@ -28,6 +32,9 @@ Proyek "Katalog Digital QR UMKM" dengan Next.js 16 dan Supabase SSR telah dikonf
 | `src/lib/supabase/client.ts` | Browser/client-side Supabase client | ✅ Ready |
 | `src/lib/supabase/server.ts` | Server-side Supabase client | ✅ Ready |
 | `src/middleware.ts` | Auth token refresh & validation | ✅ Ready |
+| `src/app/(auth)/login/page.tsx` | Login page with OAuth + Email/Password | ✅ Ready |
+| `src/app/(auth)/actions.ts` | Server Actions for auth | ✅ Ready |
+| `src/app/auth/callback/route.ts` | OAuth callback handler | ✅ Ready |
 | `src/app/page.tsx` | Home page | ✅ Ready |
 | `src/app/layout.tsx` | Root layout | ✅ Ready |
 | `src/app/globals.css` | Global styles | ✅ Ready |
@@ -36,10 +43,10 @@ Proyek "Katalog Digital QR UMKM" dengan Next.js 16 dan Supabase SSR telah dikonf
 ## Current Focus
 
 Proyek siap untuk pengembangan fitur:
-1. Halaman katalog produk UMKM
-2. QR code generation untuk produk
-3. Dashboard admin untuk manajemen produk
-4. Sistem otentikasi user
+1. Sistem otentikasi user
+2. Halaman dashboard (/dashboard)
+3. QR code generation untuk produk
+4. Admin dashboard untuk manajemen produk
 
 ## Quick Start Guide
 
@@ -75,7 +82,7 @@ Buat file di `src/app/[route]/page.tsx`
 
 ## Pending Improvements
 
-- [ ] Add Supabase Auth UI
+- [ ] Add dashboard page (/dashboard)
 - [ ] Add QR code generation library
 - [ ] Add product catalog pages
 - [ ] Add admin dashboard
@@ -86,4 +93,5 @@ Buat file di `src/app/[route]/page.tsx`
 |------|---------|
 | Initial | Template created with base setup |
 | 2026-03-06 | Supabase integration - client, server, middleware with getClaims() |
+| 2026-03-06 | Authentication system - login page, server actions, OAuth callback |
 
