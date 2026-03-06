@@ -1,65 +1,49 @@
-'use client';
+import { redirect } from 'next/navigation'
+import { createServerComponentClient } from '@/lib/supabase/server'
 
-import { createClientComponentClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+export default async function DashboardPage() {
+  const supabase = await createServerComponentClient()
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const supabase = createClientComponentClient();
-  const [user, setUser] = useState<{ email: string | null } | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-      
-      setUser(user);
-      setLoading(false);
-    };
-
-    getUser();
-  }, [supabase, router]);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data?.user) {
+    redirect('/login')
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <button
-            onClick={handleSignOut}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Keluar
-          </button>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 text-white p-4">
+      <div className="w-full max-w-4xl p-10 bg-neutral-900 rounded-3xl shadow-2xl border border-neutral-800 flex flex-col items-center gap-6">
+        <div className="w-20 h-20 bg-gradient-to-tr from-blue-500 to-emerald-500 rounded-full flex items-center justify-center text-3xl font-bold shadow-lg shadow-blue-500/20">
+          {data.user.email?.[0].toUpperCase()}
+        </div>
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold mb-2 tracking-tight">Dashboard</h1>
+          <p className="text-neutral-400 font-medium">Hello, <span className="text-blue-400">{data.user.email}</span></p>
         </div>
         
-        <div className="bg-neutral-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">Informasi Akun</h2>
-          <p className="text-gray-300">
-            Email: <span className="text-white font-medium">{user?.email}</span>
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-8">
+          <div className="p-6 bg-neutral-800/50 rounded-2xl border border-neutral-700/50 hover:border-blue-500/50 transition-all cursor-default">
+            <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">Projects</h3>
+            <p className="text-3xl font-bold">12</p>
+          </div>
+          <div className="p-6 bg-neutral-800/50 rounded-2xl border border-neutral-700/50 hover:border-emerald-500/50 transition-all cursor-default">
+            <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">Usage</h3>
+            <p className="text-3xl font-bold">84%</p>
+          </div>
+          <div className="p-6 bg-neutral-800/50 rounded-2xl border border-neutral-700/50 hover:border-purple-500/50 transition-all cursor-default">
+            <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">Credits</h3>
+            <p className="text-3xl font-bold">$42.00</p>
+          </div>
         </div>
+
+        <form action="/auth/signout" method="post" className="mt-8">
+          <button 
+            type="submit"
+            className="px-6 py-2 bg-neutral-800 hover:bg-red-900/20 hover:text-red-400 hover:border-red-900/50 text-neutral-300 font-semibold rounded-xl border border-neutral-700 transition-all"
+          >
+            Sign out
+          </button>
+        </form>
       </div>
     </div>
-  );
+  )
 }
