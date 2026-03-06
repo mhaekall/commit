@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
+  // Fallback for some versions where it's top-level
+  serverActions: {
+    bodySizeLimit: '20mb',
+  },
 };
 
 export default withSentryConfig(nextConfig, {
@@ -27,8 +36,6 @@ export default withSentryConfig(nextConfig, {
   },
 
   // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the tunnel route will not match your Next.js middleware, otherwise reporting will fail.
   tunnelRoute: "/monitoring",
 
   // Hides source maps from visitors
@@ -37,9 +44,6 @@ export default withSentryConfig(nextConfig, {
   // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
 
-  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router config route handlers.)
-  // See the following for more information:
-  // https://docs.sentry.io/product/crons/
-  // https://vercel.com/docs/cron-jobs
+  // Enables automatic instrumentation of Vercel Cron Monitors.
   automaticVercelMonitors: true,
 });

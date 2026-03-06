@@ -1,49 +1,102 @@
-import { redirect } from 'next/navigation'
-import { createServerComponentClient } from '@/lib/supabase/server'
+'use client';
 
-export default async function DashboardPage() {
-  const supabase = await createServerComponentClient()
+import { useActionState } from 'react';
+import { saveShopProfile, ActionState } from './actions';
 
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) {
-    redirect('/login')
-  }
+const initialState: ActionState = {
+  success: false,
+  message: '',
+};
+
+export default function ShopProfilePage() {
+  const [state, formAction, isPending] = useActionState(saveShopProfile, initialState);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 text-white p-4">
-      <div className="w-full max-w-4xl p-10 bg-neutral-900 rounded-3xl shadow-2xl border border-neutral-800 flex flex-col items-center gap-6">
-        <div className="w-20 h-20 bg-gradient-to-tr from-blue-500 to-emerald-500 rounded-full flex items-center justify-center text-3xl font-bold shadow-lg shadow-blue-500/20">
-          {data.user.email?.[0].toUpperCase()}
-        </div>
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold mb-2 tracking-tight">Dashboard</h1>
-          <p className="text-neutral-400 font-medium">Hello, <span className="text-blue-400">{data.user.email}</span></p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-8">
-          <div className="p-6 bg-neutral-800/50 rounded-2xl border border-neutral-700/50 hover:border-blue-500/50 transition-all cursor-default">
-            <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">Projects</h3>
-            <p className="text-3xl font-bold">12</p>
+    <div className="max-w-2xl mx-auto">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-slate-900">Profil Toko</h2>
+        <p className="text-slate-500">Kelola informasi brand dan cabang toko UMKM Anda.</p>
+      </div>
+
+      <form action={formAction} className="space-y-6 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+        {state.message && (
+          <div className={`p-4 rounded-lg text-sm font-medium ${state.success ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+            {state.message}
           </div>
-          <div className="p-6 bg-neutral-800/50 rounded-2xl border border-neutral-700/50 hover:border-emerald-500/50 transition-all cursor-default">
-            <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">Usage</h3>
-            <p className="text-3xl font-bold">84%</p>
+        )}
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="orgName" className="block text-sm font-semibold text-slate-700 mb-1">Nama Organisasi (Brand)</label>
+              <input
+                id="orgName"
+                name="orgName"
+                type="text"
+                required
+                placeholder="Contoh: Kopi Senja"
+                className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              />
+            </div>
+            <div>
+              <label htmlFor="slug" className="block text-sm font-semibold text-slate-700 mb-1">Slug URL Katalog</label>
+              <input
+                id="slug"
+                name="slug"
+                type="text"
+                required
+                placeholder="kopi-senja"
+                className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              />
+            </div>
           </div>
-          <div className="p-6 bg-neutral-800/50 rounded-2xl border border-neutral-700/50 hover:border-purple-500/50 transition-all cursor-default">
-            <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">Credits</h3>
-            <p className="text-3xl font-bold">$42.00</p>
+
+          <div>
+            <label htmlFor="shopName" className="block text-sm font-semibold text-slate-700 mb-1">Nama Cabang Toko</label>
+            <input
+              id="shopName"
+              name="shopName"
+              type="text"
+              required
+              placeholder="Contoh: Cabang Jakarta Pusat"
+              className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-4">
+            <div>
+              <label htmlFor="logo" className="block text-sm font-semibold text-slate-700 mb-1">Logo Toko (Upload)</label>
+              <input
+                id="logo"
+                name="logo"
+                type="file"
+                accept="image/*"
+                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all"
+              />
+            </div>
+            <div>
+              <label htmlFor="qris" className="block text-sm font-semibold text-slate-700 mb-1">Gambar QRIS (Upload)</label>
+              <input
+                id="qris"
+                name="qris"
+                type="file"
+                accept="image/*"
+                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all"
+              />
+            </div>
           </div>
         </div>
 
-        <form action="/auth/signout" method="post" className="mt-8">
-          <button 
+        <div className="pt-6">
+          <button
             type="submit"
-            className="px-6 py-2 bg-neutral-800 hover:bg-red-900/20 hover:text-red-400 hover:border-red-900/50 text-neutral-300 font-semibold rounded-xl border border-neutral-700 transition-all"
+            disabled={isPending}
+            className={`w-full py-3 px-4 rounded-xl text-white font-bold shadow-lg shadow-indigo-100 transition-all ${isPending ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98]'}`}
           >
-            Sign out
+            {isPending ? 'Menyimpan...' : 'Simpan Profil Toko'}
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
-  )
+  );
 }
