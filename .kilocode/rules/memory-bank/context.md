@@ -1,10 +1,10 @@
-# Active Context: Next.js Starter Template
+# Active Context: QR Katalog Digital UMKM
 
 ## Current State
 
-**Template Status**: ✅ Ready for development
+**Project Status**: ✅ Supabase Integration Complete
 
-The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. It's ready for AI-assisted expansion to build any type of application.
+Proyek "Katalog Digital QR UMKM" dengan Next.js 16 dan Supabase SSR telah dikonfigurasi. Siap untuk pengembangan fitur katalog digital dan QR code.
 
 ## Recently Completed
 
@@ -14,11 +14,20 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] ESLint configuration
 - [x] Memory bank documentation
 - [x] Recipe system for common features
+- [x] Supabase (@supabase/supabase-js, @supabase/ssr) installation
+- [x] .env.local configuration template
+- [x] lib/supabase/client.ts - Browser client (createBrowserClient)
+- [x] lib/supabase/server.ts - Server client (createServerClient)
+- [x] middleware.ts - Auth token refresh with getClaims() validation
 
 ## Current Structure
 
 | File/Directory | Purpose | Status |
 |----------------|---------|--------|
+| `.env.local` | Supabase credentials | ✅ Ready (needs real values) |
+| `src/lib/supabase/client.ts` | Browser/client-side Supabase client | ✅ Ready |
+| `src/lib/supabase/server.ts` | Server-side Supabase client | ✅ Ready |
+| `src/middleware.ts` | Auth token refresh & validation | ✅ Ready |
 | `src/app/page.tsx` | Home page | ✅ Ready |
 | `src/app/layout.tsx` | Root layout | ✅ Ready |
 | `src/app/globals.css` | Global styles | ✅ Ready |
@@ -26,47 +35,37 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 
 ## Current Focus
 
-The template is ready. Next steps depend on user requirements:
-
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
+Proyek siap untuk pengembangan fitur:
+1. Halaman katalog produk UMKM
+2. QR code generation untuk produk
+3. Dashboard admin untuk manajemen produk
+4. Sistem otentikasi user
 
 ## Quick Start Guide
 
-### To add a new page:
+### Konfigurasi Awal
 
-Create a file at `src/app/[route]/page.tsx`:
+1. Buat proyek Supabase di https://supabase.com
+2. Isi `.env.local` dengan credentials dari Supabase Dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### Menggunakan Supabase Client
+
+**Client Component (Browser):**
 ```tsx
-export default function NewPage() {
-  return <div>New page content</div>;
-}
+'use client';
+import { createClientComponentClient } from '@/lib/supabase/client';
 ```
 
-### To add components:
-
-Create `src/components/` directory and add components:
+**Server Component / Server Action:**
 ```tsx
-// src/components/ui/Button.tsx
-export function Button({ children }: { children: React.ReactNode }) {
-  return <button className="px-4 py-2 bg-blue-600 text-white rounded">{children}</button>;
-}
+import { createServerComponentClient } from '@/lib/supabase/server';
 ```
 
-### To add a database:
+### Menambahkan halaman baru:
 
-Follow `.kilocode/recipes/add-database.md`
-
-### To add API routes:
-
-Create `src/app/api/[route]/route.ts`:
-```tsx
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({ message: "Hello" });
-}
-```
+Buat file di `src/app/[route]/page.tsx`
 
 ## Available Recipes
 
@@ -76,12 +75,15 @@ export async function GET() {
 
 ## Pending Improvements
 
-- [ ] Add more recipes (auth, email, etc.)
-- [ ] Add example components
-- [ ] Add testing setup recipe
+- [ ] Add Supabase Auth UI
+- [ ] Add QR code generation library
+- [ ] Add product catalog pages
+- [ ] Add admin dashboard
 
 ## Session History
 
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
+| 2026-03-06 | Supabase integration - client, server, middleware with getClaims() |
+
