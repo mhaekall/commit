@@ -8,10 +8,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '20mb',
     },
   },
-  // Fallback for some versions where it's top-level
-  serverActions: {
-    bodySizeLimit: '20mb',
-  },
 };
 
 export default withSentryConfig(nextConfig, {
