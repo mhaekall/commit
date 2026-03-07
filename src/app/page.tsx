@@ -1,66 +1,96 @@
 import Link from 'next/link'
 import { createServerComponentClient } from '@/lib/supabase/server'
 
-export default async function Home() {
+export const dynamic = 'force-dynamic'
+
+export default async function HomePage() {
   const supabase = await createServerComponentClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 text-white p-4">
-      <div className="text-center max-w-2xl">
-        <h1 className="text-6xl font-extrabold mb-6 tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
-          Commit Project
-        </h1>
-        <p className="text-xl text-neutral-400 mb-10 leading-relaxed">
-          The ultimate AI-powered starter template for modern Next.js applications. 
-          Built with Supabase, Tailwind CSS, and TypeScript.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          {user ? (
-            <Link 
-              href="/dashboard" 
-              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all text-lg"
-            >
-              Go to Dashboard
-            </Link>
-          ) : (
-            <>
-              <Link 
-                href="/login" 
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all text-lg"
-              >
-                Get Started
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjEiLz48L2c+PC9zdmc+')] opacity-40" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
+          <div className="text-center">
+            <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-6">
+              Katalog Digital <span className="text-indigo-600">QR</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-slate-600 mb-8 max-w-2xl mx-auto">
+              Ubah menu fisik menjadi katalog digital elegan yang dapat diakses instan melalui scan QR Code.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {user ? (
+                <Link href="/dashboard" className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-indigo-600 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+                Dashboard
               </Link>
-              <a 
-                href="https://github.com/mhaekall/commit" 
-                target="_blank"
-                className="px-8 py-3 bg-neutral-900 hover:bg-neutral-800 font-bold rounded-xl border border-neutral-800 transition-all text-lg"
-              >
-                GitHub
+              ) : (
+                <Link href="/login" className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-indigo-600 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+                Mulai Gratis
+              </Link>
+              )}
+              <a href="#features" className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-slate-700 bg-white rounded-2xl border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all">
+                Pelajari Lebih Lanjut
               </a>
-            </>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Tiga Langkah Mudah
+            </h2>
+            <p className="text-lg text-slate-600">
+              Tidak perlu keahlian teknis. Hanya tiga langkah sederhana.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { step: '01', title: 'Daftar', desc: 'Buat akun dengan email atau Google dalam 30 detik' },
+              { step: '02', title: 'Upload Produk', desc: 'Tambahkan foto, nama, dan harga produk Anda' },
+              { step: '03', title: 'Bagikan QR', desc: 'Scan QR untuk akses katalog digital Anda' },
+            ].map((item) => (
+              <div key={item.step} className="relative p-8 bg-gradient-to-br from-slate-50 to-white rounded-3xl border border-slate-100 hover:shadow-xl transition-all">
+                <span className="text-6xl font-black text-indigo-100 absolute top-4 left-6">{item.step}</span>
+                <h3 className="text-xl font-bold text-slate-900 mt-12 mb-3">{item.title}</h3>
+                <p className="text-slate-600">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-slate-900">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Siap Mengubah Bisnis Anda?
+          </h2>
+          <p className="text-xl text-slate-300 mb-8">
+            Bergabunglah dengan ribuan UMKM yang telah menggunakan katalog digital.
+          </p>
+          {!user && (
+            <Link href="/login" className="inline-flex items-center justify-center px-10 py-5 text-xl font-bold text-slate-900 bg-white rounded-2xl hover:bg-slate-100 transition-all">
+              Daftar Sekarang - Gratis!
+            </Link>
           )}
         </div>
-      </div>
-      
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
-        <div className="p-8 bg-neutral-900/50 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-all">
-          <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-lg flex items-center justify-center mb-6 text-xl">⚡</div>
-          <h3 className="text-xl font-bold mb-3">Fast Setup</h3>
-          <p className="text-neutral-500">Zero configuration needed. Start building your next idea in seconds.</p>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-slate-500">
+            © 2024 QR Katalog Digital. Dibuat untuk UMKM Indonesia.
+          </p>
         </div>
-        <div className="p-8 bg-neutral-900/50 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-all">
-          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center mb-6 text-xl">🛡️</div>
-          <h3 className="text-xl font-bold mb-3">Secure Auth</h3>
-          <p className="text-neutral-500">Robust authentication powered by Supabase Auth and Next.js Middleware.</p>
-        </div>
-        <div className="p-8 bg-neutral-900/50 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-all">
-          <div className="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-lg flex items-center justify-center mb-6 text-xl">🤖</div>
-          <h3 className="text-xl font-bold mb-3">AI-Ready</h3>
-          <p className="text-neutral-500">Designed specifically to be extended and modified by AI assistants.</p>
-        </div>
-      </div>
+      </footer>
     </main>
   )
 }

@@ -2,6 +2,8 @@ import { createServerComponentClient } from '@/lib/supabase/server';
 import ProductForm from './product-form';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProductsPage() {
   const supabase = await createServerComponentClient();
 

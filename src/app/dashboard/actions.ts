@@ -66,10 +66,45 @@ export async function saveShopProfile(
 
     if (orgError) throw orgError;
 
-    // ... (logic file upload tetap sama) ...
+    // 3. Handle File Uploads (Logo & QRIS)
+    let logoUrl: string | null = null;
+    let qrisUrl: string | null = null;
+    
+    // Get existing shop to preserve existing URLs
+    const { data: existingShopData } = await supabase
+      .from('shops')
+      .select('id, location_data')
+      .eq('org_id', org.id)
+      .single();
+    
+    const existingLocationData = existingShopData?.location_data || {};
+    
+    // Upload logo if provided
+    if (logoFile && logoFile.size > 0) {
+      try {
+        logoUrl = await uploadFile(supabase, logoFile, `${org.id}/logos`) || existingLocationData.logo_url;
+      } catch (e) {
+        console.error('Logo upload failed:', e);
+        logoUrl = existingLocationData.logo_url || null;
+      }
+    } else {
+      logoUrl = existingLocationData.logo_url || null;
+    }
+    
+    // Upload QRIS if provided
+    if (qrisFile && qrisFile.size > 0) {
+      try {
+        qrisUrl = await uploadFile(supabase, qrisFile, `${org.id}/qris`) || existingLocationData.qris_url;
+      } catch (e) {
+        console.error('QRIS upload failed:', e);
+        qrisUrl = existingLocationData.qris_url || null;
+      }
+    } else {
+      qrisUrl = existingLocationData.qris_url || null;
+    }
 
     // 4. Handle Shops (UPSERT manual)
-    const { data: existingShop } = await supabase
+    const { data: shopExistingData } = await supabase
       .from('shops')
       .select('id')
       .eq('org_id', org.id)
@@ -79,7 +114,7 @@ export async function saveShopProfile(
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .upsert({
-        id: existingShop?.id,
+        id: shopExistingData?.id,
         org_id: org.id,
         name: shopName,
         location_data: locationData

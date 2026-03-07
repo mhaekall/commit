@@ -1,6 +1,18 @@
 -- Enable required extension for UUID generation (pgcrypto preferred on Supabase)
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-------------------------------------------------------
+-- STORAGE BUCKETS
+-- NOTE: Bucket creation must be done via Supabase Dashboard UI
+-- or via Storage API, not via SQL direct insert.
+--
+-- To create buckets manually:
+-- 1. Go to Supabase Dashboard > Storage
+-- 2. Create new bucket: shop-logos (public)
+-- 3. Create new bucket: qris-images (public)  
+-- 4. Create new bucket: product-images (public)
+-------------------------------------------------------
+
 ------------------------
 -- SCHEMA / TABLES
 ------------------------
@@ -126,14 +138,17 @@ ALTER TABLE public.analytics_events  ENABLE ROW LEVEL SECURITY;
 -- POLICIES: PUBLIC (anon) READ-ONLY
 ------------------------
 
+DROP POLICY IF EXISTS "anon_select_active_shops" ON public.shops;
 CREATE POLICY "anon_select_active_shops" ON public.shops
   FOR SELECT TO anon
   USING (is_active = true);
 
+DROP POLICY IF EXISTS "anon_select_visible_categories" ON public.categories;
 CREATE POLICY "anon_select_visible_categories" ON public.categories
   FOR SELECT TO anon
   USING (is_visible = true);
 
+DROP POLICY IF EXISTS "anon_select_visible_products" ON public.products;
 CREATE POLICY "anon_select_visible_products" ON public.products
   FOR SELECT TO anon
   USING (is_visible = true);
@@ -142,10 +157,12 @@ CREATE POLICY "anon_select_visible_products" ON public.products
 -- POLICIES: profiles
 ------------------------
 
+DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
 CREATE POLICY "profiles_select_own" ON public.profiles
   FOR SELECT TO authenticated
   USING (id = (SELECT auth.uid()));
 
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
 CREATE POLICY "profiles_update_own" ON public.profiles
   FOR UPDATE TO authenticated
   USING (id = (SELECT auth.uid()))
@@ -155,6 +172,7 @@ CREATE POLICY "profiles_update_own" ON public.profiles
 -- POLICIES: organizations
 ------------------------
 
+DROP POLICY IF EXISTS "org_owner_all" ON public.organizations;
 CREATE POLICY "org_owner_all" ON public.organizations
   FOR ALL TO authenticated
   USING    (owner_id = (SELECT auth.uid()))
@@ -164,6 +182,19 @@ CREATE POLICY "org_owner_all" ON public.organizations
 -- POLICIES: shops
 ------------------------
 
+-- Allow users to create shops for their own organizations
+DROP POLICY IF EXISTS "org_owner_can_create_shops" ON public.shops;
+CREATE POLICY "org_owner_can_create_shops" ON public.shops
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.organizations o
+      WHERE o.id = public.shops.org_id
+        AND o.owner_id = (SELECT auth.uid())
+    )
+  );
+
+DROP POLICY IF EXISTS "shops_members_all" ON public.shops;
 CREATE POLICY "shops_members_all" ON public.shops
   FOR ALL TO authenticated
   USING (
@@ -185,51 +216,56 @@ CREATE POLICY "shops_members_all" ON public.shops
 -- POLICIES: memberships
 ------------------------
 
-CREATE POLICY "memberships_user_select" ON public.memberships
+-- Drop all membership policies first
+DROP POLICY IF EXISTS "memberships_user_select" ON public.memberships;
+DROP POLICY IF EXISTS "memberships_user_insert_own" ON public.memberships;
+DROP POLICY IF EXISTS "memberships_update_owner_or_self" ON public.memberships;
+DROP POLICY IF EXISTS "memberships_delete_owner_or_self" ON public.memberships;
+
+-- Simple policies: users can only see/manage their own memberships
+CREATE POLICY "memberships_select_own" ON public.memberships
   FOR SELECT TO authenticated
   USING (user_id = (SELECT auth.uid()));
 
-CREATE POLICY "memberships_user_insert_own" ON public.memberships
+CREATE POLICY "memberships_insert_own" ON public.memberships
   FOR INSERT TO authenticated
   WITH CHECK (user_id = (SELECT auth.uid()));
 
-CREATE POLICY "memberships_update_owner_or_self" ON public.memberships
+CREATE POLICY "memberships_update_own" ON public.memberships
   FOR UPDATE TO authenticated
-  USING (
-    user_id = (SELECT auth.uid())
-    OR EXISTS (
-      SELECT 1 FROM public.memberships m2
-      WHERE m2.user_id = (SELECT auth.uid())
-        AND m2.shop_id = public.memberships.shop_id
-        AND m2.role = 'Owner'
-    )
-  )
-  WITH CHECK (
-    user_id = (SELECT auth.uid())
-    OR EXISTS (
-      SELECT 1 FROM public.memberships m2
-      WHERE m2.user_id = (SELECT auth.uid())
-        AND m2.shop_id = public.memberships.shop_id
-        AND m2.role = 'Owner'
-    )
-  );
+  USING (user_id = (SELECT auth.uid()))
+  WITH CHECK (user_id = (SELECT auth.uid()));
 
-CREATE POLICY "memberships_delete_owner_or_self" ON public.memberships
+CREATE POLICY "memberships_delete_own" ON public.memberships
   FOR DELETE TO authenticated
-  USING (
-    user_id = (SELECT auth.uid())
-    OR EXISTS (
-      SELECT 1 FROM public.memberships m2
-      WHERE m2.user_id = (SELECT auth.uid())
-        AND m2.shop_id = public.memberships.shop_id
-        AND m2.role = 'Owner'
-    )
-  );
+  USING (user_id = (SELECT auth.uid()));
+
+-- Allow authenticated users to select all memberships (for checking ownership)
+CREATE POLICY "memberships_select_all" ON public.memberships
+  FOR SELECT TO authenticated
+  USING (true);
+
+-- Allow authenticated users to insert memberships
+CREATE POLICY "memberships_insert_all" ON public.memberships
+  FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Allow authenticated users to update memberships
+CREATE POLICY "memberships_update_all" ON public.memberships
+  FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Allow authenticated users to delete memberships
+CREATE POLICY "memberships_delete_all" ON public.memberships
+  FOR DELETE TO authenticated
+  USING (true);
 
 ------------------------
 -- POLICIES: categories
 ------------------------
 
+DROP POLICY IF EXISTS "categories_members_all" ON public.categories;
 CREATE POLICY "categories_members_all" ON public.categories
   FOR ALL TO authenticated
   USING (
@@ -251,6 +287,7 @@ CREATE POLICY "categories_members_all" ON public.categories
 -- POLICIES: products
 ------------------------
 
+DROP POLICY IF EXISTS "products_members_all" ON public.products;
 CREATE POLICY "products_members_all" ON public.products
   FOR ALL TO authenticated
   USING (
@@ -272,6 +309,7 @@ CREATE POLICY "products_members_all" ON public.products
 -- POLICIES: product_variants
 ------------------------
 
+DROP POLICY IF EXISTS "product_variants_members_all" ON public.product_variants;
 CREATE POLICY "product_variants_members_all" ON public.product_variants
   FOR ALL TO authenticated
   USING (
@@ -295,6 +333,7 @@ CREATE POLICY "product_variants_members_all" ON public.product_variants
 -- POLICIES: subscriptions
 ------------------------
 
+DROP POLICY IF EXISTS "subscriptions_org_owner_all" ON public.subscriptions;
 CREATE POLICY "subscriptions_org_owner_all" ON public.subscriptions
   FOR ALL TO authenticated
   USING (
@@ -316,6 +355,7 @@ CREATE POLICY "subscriptions_org_owner_all" ON public.subscriptions
 -- POLICIES: analytics_events
 ------------------------
 
+DROP POLICY IF EXISTS "analytics_members_insert" ON public.analytics_events;
 CREATE POLICY "analytics_members_insert" ON public.analytics_events
   FOR INSERT TO authenticated
   WITH CHECK (
@@ -329,6 +369,7 @@ CREATE POLICY "analytics_members_insert" ON public.analytics_events
     END
   );
 
+DROP POLICY IF EXISTS "analytics_members_select" ON public.analytics_events;
 CREATE POLICY "analytics_members_select" ON public.analytics_events
   FOR SELECT TO authenticated
   USING (
